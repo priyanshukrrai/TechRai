@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TechRai — Priyanshu Kumar Rai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05060b;--bg-soft:#0b0d16;--ink:#f4f6fb;--muted:#8b91a7;
+    --gold:#f5a623;--amber:#ffce6e;--blue:#4a9fff;--green:#46e3a0;
+    --line:rgba(255,255,255,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;background:var(--bg);
+    color:var(--ink);overflow-x:hidden;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:radial-gradient(rgba(255,255,255,.6) .5px,transparent .5px);background-size:3px 3px}
+  .wrap{position:relative;z-index:2}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+    justify-content:space-between;padding:20px clamp(20px,5vw,70px);
+    backdrop-filter:blur(6px);border-bottom:1px solid transparent;transition:.3s}
+  nav.scrolled{background:rgba(5,6,11,.75);border-bottom:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:20px;letter-spacing:-.5px;position:relative;cursor:pointer}
+  .logo .mark{width:34px;height:34px;flex:none;position:relative}
+  .logo .mark svg{width:100%;height:100%;display:block;border-radius:11px;
+    transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  .logo .mark::after{content:"";position:absolute;inset:-3px;border-radius:14px;
+    background:linear-gradient(135deg,var(--gold),var(--blue));filter:blur(11px);
+    opacity:.45;z-index:-1;animation:logopulse 3s ease-in-out infinite}
+  .logo .mark .ring{transform-box:fill-box;transform-origin:center;animation:logospin 7s linear infinite}
+  @keyframes logospin{to{transform:rotate(360deg)}}
+  @keyframes logopulse{0%,100%{opacity:.3}50%{opacity:.7}}
+  .logo .word{font-family:'Space Grotesk','Inter',sans-serif;font-weight:700;font-size:21px;letter-spacing:-.4px;
+    background:linear-gradient(100deg,#fff 0%,#fff 38%,var(--amber) 49%,var(--gold) 58%,#fff 78%);
+    background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:logoshine 6s linear infinite}
+  .logo .word b{font-weight:800}
+  @keyframes logoshine{0%{background-position:120% 0}100%{background-position:-120% 0}}
+  .logo:hover .mark svg{transform:rotate(-6deg) scale(1.07)}
+  .logo:hover .mark::after{opacity:.95}
+  .logo:hover .word{animation-duration:1.6s}
+  .nav-links{display:flex;gap:32px;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  .nav-links a{transition:color .2s}.nav-links a:hover{color:var(--ink)}
+  .nav-cta{font-size:12px;text-transform:uppercase;letter-spacing:1px;border:1px solid var(--line);
+    padding:11px 20px;border-radius:40px;transition:.25s}
+  .nav-cta:hover{background:var(--ink);color:#000;border-color:var(--ink)}
+  @media(max-width:860px){.nav-links{display:none}}
+
+  header{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:0 clamp(20px,5vw,70px);position:relative}
+  .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:3px;
+    text-transform:uppercase;color:var(--gold);margin-bottom:24px}
+  .eyebrow::before{content:'';width:34px;height:1px;background:var(--gold)}
+  h1{font-size:clamp(44px,8.5vw,128px);line-height:.95;font-weight:800;letter-spacing:-3px}
+  h1 .grad{background:linear-gradient(120deg,var(--gold),var(--amber),var(--blue));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .role{margin-top:22px;font-size:clamp(16px,2.4vw,24px);font-weight:600;color:var(--ink)}
+  .role span{color:var(--blue)}
+  .lede{margin-top:22px;max-width:56ch;color:var(--muted);font-size:clamp(15px,2vw,18px)}
+  .meta{margin-top:30px;display:flex;gap:26px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+  .meta b{color:var(--ink);font-weight:600}
+  .hero-actions{margin-top:40px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:46px;
+    font-size:14px;font-weight:600;letter-spacing:.4px;transition:.28s;cursor:pointer}
+  .btn-primary{background:linear-gradient(120deg,var(--gold),var(--amber));color:#1a1200;
+    box-shadow:0 10px 40px -10px var(--gold)}
+  .btn-primary:hover{transform:translateY(-3px)}
+  .btn-ghost{color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{color:var(--gold);border-color:rgba(245,166,35,.4)}
+  .scroll-hint{position:absolute;bottom:28px;left:clamp(20px,5vw,70px);font-size:11px;
+    letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px}
+  .scroll-hint .bar{width:1px;height:38px;background:linear-gradient(var(--gold),transparent);animation:drop 1.8s infinite}
+  @keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  section.block{padding:clamp(70px,11vh,140px) clamp(20px,5vw,70px);position:relative}
+  .sec-head{margin-bottom:54px;max-width:760px}
+  .sec-tag{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+  .sec-head h2{font-size:clamp(32px,6vw,68px);font-weight:800;letter-spacing:-2px;line-height:1.02;margin-top:14px}
+  .sec-head p{color:var(--muted);font-size:17px;margin-top:18px}
+
+  .about{display:grid;grid-template-columns:1.3fr .7fr;gap:60px;align-items:center}
+  .about p{color:#c7ccdb;font-size:clamp(17px,2.2vw,22px);line-height:1.7}
+  .about p em{color:var(--gold);font-style:normal}
+  .about-side{display:grid;gap:14px}
+  .fact{border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:rgba(255,255,255,.02)}
+  .fact .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+  .fact .v{font-size:18px;font-weight:700;margin-top:6px}
+  @media(max-width:860px){.about{grid-template-columns:1fr;gap:34px}}
+
+  .skills{display:flex;flex-wrap:wrap;gap:12px}
+  .chip{border:1px solid var(--line);border-radius:40px;padding:12px 22px;font-size:14px;
+    color:#d3d8e6;transition:.25s;background:rgba(255,255,255,.02)}
+  .chip:hover{border-color:rgba(245,166,35,.5);color:var(--gold);transform:translateY(-3px)}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);padding:46px 0;margin-top:10px}
+  .stat .v{font-size:clamp(34px,5vw,58px);font-weight:800;letter-spacing:-2px;
+    background:linear-gradient(120deg,var(--gold),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .l{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-top:8px}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);gap:34px}}
+
+  .cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .cert{border:1px solid var(--line);border-radius:20px;padding:28px 26px;
+    background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+    transition:.3s;display:flex;flex-direction:column;min-height:210px}
+  .cert:hover{transform:translateY(-8px);border-color:rgba(245,166,35,.4);
+    background:linear-gradient(180deg,rgba(245,166,35,.08),transparent)}
+  .cert .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .cert .issuer{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);font-weight:600}
+  .cert .date{font-size:12px;color:var(--muted)}
+  .cert h3{font-size:19px;font-weight:700;letter-spacing:-.5px;line-height:1.25}
+  .cert .spacer{flex:1}
+  .cert .view{margin-top:18px;font-size:13px;font-weight:600;color:var(--gold);display:inline-flex;
+    align-items:center;gap:8px;transition:.2s}
+  .cert .view:hover{gap:12px}
+  .cert .exp{font-size:11px;color:var(--muted);margin-top:6px}
+  @media(max-width:900px){.cert-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.cert-grid{grid-template-columns:1fr}}
+
+  .edu{border:1px solid var(--line);border-radius:22px;padding:38px clamp(26px,4vw,48px);
+    background:rgba(255,255,255,.02);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+  .edu h3{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-1px}
+  .edu .deg{color:var(--muted);margin-top:8px;font-size:16px}
+  .edu .yr{font-size:15px;color:var(--gold);font-weight:600;letter-spacing:1px;border:1px solid rgba(245,166,35,.3);
+    padding:10px 20px;border-radius:40px}
+
+  .contact{text-align:center;padding:clamp(90px,16vh,180px) 20px}
+  .contact .sec-tag{display:block}
+  .contact a.mail{display:inline-block;margin-top:22px;font-size:clamp(26px,6vw,72px);font-weight:800;
+    letter-spacing:-2px;background:linear-gradient(120deg,#fff,var(--gold),var(--blue));
+    -webkit-background-clip:text;background-clip:text;color:transparent;transition:.3s;word-break:break-word}
+  .contact a.mail:hover{opacity:.8}
+  .contact p{color:var(--muted);margin-top:24px;max-width:46ch;margin-inline:auto}
+
+  footer{border-top:1px solid var(--line);padding:38px clamp(20px,5vw,70px);display:flex;
+    justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;color:var(--muted);font-size:13px}
+  footer .socials{display:flex;gap:22px}
+  footer .socials a:hover{color:var(--gold)}
+
+  .reveal{opacity:0;transform:translateY(40px);transition:.8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="grain"></div>
+
+<div class="wrap">
+  <nav id="nav">
+    <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="lg" x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#ffd98a"/><stop offset=".45" stop-color="#f5a623"/><stop offset="1" stop-color="#4a9fff"/></linearGradient><linearGradient id="gloss" x1="0" y1="0" x2="0" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect x="3" y="3" width="38" height="38" rx="13" fill="#0b0d16"/><rect x="3" y="3" width="38" height="38" rx="13" fill="none" stroke="url(#lg)" stroke-width="2"/><circle class="ring" cx="22" cy="22" r="16.5" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1" stroke-dasharray="2 8"/><path d="M14 28 L22 20 L30 28" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 22 L22 14 L30 22" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="38" height="38" rx="13" fill="url(#gloss)"/></svg></span><span class="word">Tech<b>Rai</b></span></div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#certs">Certifications</a>
+      <a href="#education">Education</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="https://www.linkedin.com/in/priyanshu-kumar-rai-b969443a8" target="_blank" class="nav-cta">LinkedIn ↗</a>
+  </nav>
+
+  <header>
+    <span class="eyebrow">Motihari, Bihar · India</span>
+    <h1>Priyanshu <span class="grad">Kumar Rai</span></h1>
+    <p class="role">Aspiring <span>Blockchain</span> &amp; <span>Data</span> Technologist</p>
+    <p class="lede">I love working with blockchain and cryptocurrency technologies and enjoy exploring how decentralized systems, data, and AI can shape the future of the web.</p>
+    <div class="meta">
+      <div><b>10+</b> Certifications</div>
+      <div><b>Sandip University</b> · 2025–2029</div>
+      <div>Blockchain · Data · AI · Cybersecurity</div>
+    </div>
+    <div class="hero-actions">
+      <a href="#certs" class="btn btn-primary">View certifications →</a>
+      <a href="#contact" class="btn btn-ghost">Get in touch</a>
+    </div>
+    <div class="scroll-hint"><span class="bar"></span>Scroll to explore</div>
+  </header>
+
+  <section class="block reveal" id="about">
+    <div class="about">
+      <div>
+        <span class="sec-tag">About me</span>
+        <p style="margin-top:24px">I'm a student and lifelong learner passionate about <em>blockchain</em> and <em>cryptocurrency</em> technologies. I'm building a strong foundation across <em>data science</em>, <em>artificial intelligence</em>, <em>cybersecurity</em> and <em>digital marketing</em> — turning curiosity into real, verified skills, one certification at a time.</p>
+      </div>
+      <div class="about-side">
+        <div class="fact"><div class="k">Location</div><div class="v">Motihari, Bihar, India</div></div>
+        <div class="fact"><div class="k">Currently</div><div class="v">B.Tech @ Sandip University</div></div>
+        <div class="fact"><div class="k">Focus area</div><div class="v">Blockchain &amp; Crypto</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="skills">
+    <div class="sec-head">
+      <span class="sec-tag">Skills &amp; interests</span>
+      <h2>What I work with</h2>
+    </div>
+    <div class="skills">
+      <span class="chip">Blockchain</span>
+      <span class="chip">Cryptocurrency</span>
+      <span class="chip">Microsoft Azure</span>
+      <span class="chip">Python</span>
+      <span class="chip">Data Visualization</span>
+      <span class="chip">R</span>
+      <span class="chip">Data Science</span>
+      <span class="chip">Artificial Intelligence</span>
+      <span class="chip">Cybersecurity</span>
+      <span class="chip">Digital Marketing</span>
+      <span class="chip">Google Ads</span>
+      <span class="chip">AI Marketing</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v" data-count="10">0</div><div class="l">Certifications</div></div>
+      <div class="stat"><div class="v" data-count="6">0</div><div class="l">Domains</div></div>
+      <div class="stat"><div class="v" data-count="7">0</div><div class="l">Top issuers</div></div>
+      <div class="stat"><div class="v" data-count="2029" data-plain="1">0</div><div class="l">Graduating</div></div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="certs">
+    <div class="sec-head">
+      <span class="sec-tag">Licenses &amp; certifications</span>
+      <h2>Verified credentials</h2>
+      <p>A growing collection of certifications across blockchain, data, AI, cybersecurity and marketing — each one independently verifiable.</p>
+    </div>
+    <div class="cert-grid">
+
+      <article class="cert">
+        <div class="top"><span class="issuer">Udemy</span><span class="date">Mar 2026</span></div>
+        <h3>Microsoft Azure Administrator Complete Course</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://ude.my/UC-dca3d599-252c-4d1e-8b18-5942663bfa84">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">IBM</span><span class="date">Feb 2026</span></div>
+        <h3>Data Visualization Using Python</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://www.credly.com/badges/0ca1332c-936d-4886-a01c-73b7377bce77/linked_in_profile">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">IBM</span><span class="date">Feb 2026</span></div>
+        <h3>Data Visualization with R</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://www.credly.com/earner/earned/badge/9ac9e91e-8067-40d9-b390-52785c317eb2">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">IBM</span><span class="date">Feb 2026</span></div>
+        <h3>Python for Data Science</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://www.credly.com/badges/f877ffe9-52ad-4bc5-808c-3671074dc57b/linked_in_profile">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">FutureLearn</span><span class="date">Feb 2026</span></div>
+        <h3>How to Get Into Blockchain — Univ. of Leeds &amp; Click Start</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://www.futurelearn.com/certificates/pbq04iz">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">University of Urbino</span><span class="date">Feb 2026</span></div>
+        <h3>Intelligenza Artificiale (Artificial Intelligence)</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://mooc.uniurb.it/moodle/badges/badge.php?hash=4d1556d9bfede2e5ebbb60ba26fde16b9d1df36d">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">Cisco</span><span class="date">Feb 2026</span></div>
+        <h3>Introduction to Cybersecurity</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://www.credly.com/badges/73f0878d-843d-4f1e-b3c9-145b5d85abc0/linked_in_profile">View certificate →</a>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">HubSpot Academy</span><span class="date">Feb 2026</span></div>
+        <h3>Digital Marketing</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://app-na2.hubspot.com/academy/achievements/pvt81tnp/en/1/priyanshu-kumar-rai/digital-marketing">View certificate →</a>
+        <span class="exp">Valid through Mar 2027</span>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">Semrush</span><span class="date">Feb 2026</span></div>
+        <h3>Become an AI-Powered Marketer</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://static.semrush.com/academy/certificates/55fde16894/priyanshu-kumar-rai_26.pdf">View certificate →</a>
+        <span class="exp">Valid through Feb 2027</span>
+      </article>
+
+      <article class="cert">
+        <div class="top"><span class="issuer">Google Skillshop</span><span class="date">Feb 2026</span></div>
+        <h3>Google Ads Apps Certification</h3>
+        <div class="spacer"></div>
+        <a class="view" target="_blank" href="https://skillshop.credential.net/caccd48e-c197-4583-b625-de38150de45c">View certificate →</a>
+        <span class="exp">Valid through Feb 2027</span>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="block reveal" id="education">
+    <div class="sec-head">
+      <span class="sec-tag">Education</span>
+      <h2>Where I'm learning</h2>
+    </div>
+    <div class="edu">
+      <div>
+        <h3>Sandip University</h3>
+        <div class="deg">Undergraduate</div>
+      </div>
+      <div class="yr">2025 — 2029</div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <span class="sec-tag">Let's connect</span>
+    <a class="mail" href="https://www.linkedin.com/in/priyanshu-kumar-rai-b969443a8" target="_blank">linkedin.com/in/priyanshu&#8209;kumar&#8209;rai</a>
+    <p>Open to learning opportunities, internships and collaborations in blockchain, data and AI. Let's build something.</p>
+    <div class="hero-actions" style="justify-content:center;margin-top:32px">
+      <a href="https://www.linkedin.com/in/priyanshu-kumar-rai-b969443a8" target="_blank" class="btn btn-primary">Connect on LinkedIn →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 44 44"><defs><linearGradient id="lg2" x1="4" y1="4" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#ffd98a"/><stop offset=".45" stop-color="#f5a623"/><stop offset="1" stop-color="#4a9fff"/></linearGradient><linearGradient id="gloss2" x1="0" y1="0" x2="0" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect x="3" y="3" width="38" height="38" rx="13" fill="#0b0d16"/><rect x="3" y="3" width="38" height="38" rx="13" fill="none" stroke="url(#lg2)" stroke-width="2"/><circle class="ring" cx="22" cy="22" r="16.5" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1" stroke-dasharray="2 8"/><path d="M14 28 L22 20 L30 28" fill="none" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 22 L22 14 L30 22" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="38" height="38" rx="13" fill="url(#gloss2)"/></svg></span><span class="word">Tech<b>Rai</b></span></div>
+    <div class="socials">
+      <a href="https://www.linkedin.com/in/priyanshu-kumar-rai-b969443a8" target="_blank">LinkedIn</a>
+    </div>
+    <div>© 2026 Priyanshu Kumar Rai</div>
+  </footer>
+</div>
+
+<script>
+const canvas=document.getElementById('bg-canvas');const ctx=canvas.getContext('2d');
+let W,H,DPR,stars=[],motes=[],mx=0.5,my=0.5;
+const COLORS=['#f5a623','#ffce6e','#4a9fff','#ffffff'];
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=canvas.width=innerWidth*DPR;H=canvas.height=innerHeight*DPR;
+  canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';init();}
+function init(){const sc=Math.floor((innerWidth*innerHeight)/4500);stars=[];
+  for(let i=0;i<sc;i++)stars.push({x:Math.random()*W,y:Math.random()*H,z:Math.random()*0.8+0.2,r:Math.random()*1.4*DPR+0.3*DPR,tw:Math.random()*Math.PI*2});
+  const mc=Math.floor((innerWidth*innerHeight)/26000);motes=[];
+  for(let i=0;i<mc;i++)motes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.18*DPR,vy:(Math.random()-0.5)*0.18*DPR,r:Math.random()*2.6*DPR+1*DPR,c:COLORS[Math.floor(Math.random()*COLORS.length)],a:Math.random()*0.5+0.2});}
+let t=0;
+function draw(){t+=0.01;ctx.clearRect(0,0,W,H);
+  const gx=mx*W,gy=my*H;const g=ctx.createRadialGradient(gx,gy,0,gx,gy,Math.max(W,H)*0.6);
+  g.addColorStop(0,'rgba(245,166,35,0.06)');g.addColorStop(0.4,'rgba(74,159,255,0.04)');g.addColorStop(1,'rgba(5,6,11,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(const s of stars){const tw=0.5+0.5*Math.sin(t*2+s.tw);const px=s.x+(mx-0.5)*40*DPR*s.z,py=s.y+(my-0.5)*40*DPR*s.z;
+    ctx.globalAlpha=0.25+0.6*tw*s.z;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py,s.r,0,7);ctx.fill();}
+  for(let i=0;i<motes.length;i++){const m=motes[i];m.x+=m.vx;m.y+=m.vy;
+    if(m.x<0)m.x=W;if(m.x>W)m.x=0;if(m.y<0)m.y=H;if(m.y>H)m.y=0;
+    const px=m.x+(mx-0.5)*80*DPR,py=m.y+(my-0.5)*80*DPR;
+    ctx.globalAlpha=m.a;ctx.fillStyle=m.c;ctx.shadowBlur=12*DPR;ctx.shadowColor=m.c;
+    ctx.beginPath();ctx.arc(px,py,m.r,0,7);ctx.fill();ctx.shadowBlur=0;
+    for(let j=i+1;j<motes.length;j++){const n=motes[j];const dx=m.x-n.x,dy=m.y-n.y;const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<140*DPR){ctx.globalAlpha=(1-d/(140*DPR))*0.12;ctx.strokeStyle=m.c;ctx.lineWidth=DPR*0.6;
+        ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(n.x+(mx-0.5)*80*DPR,n.y+(my-0.5)*80*DPR);ctx.stroke();}}}
+  ctx.globalAlpha=1;requestAnimationFrame(draw);}
+window.addEventListener('resize',resize);
+window.addEventListener('mousemove',e=>{mx=e.clientX/innerWidth;my=e.clientY/innerHeight;});
+resize();draw();
+const nav=document.getElementById('nav');addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40));
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');
+  if(en.target.querySelector('[data-count]'))run(en.target);io.unobserve(en.target);}});},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+function run(scope){scope.querySelectorAll('[data-count]').forEach(el=>{const tg=+el.dataset.count;let c=0;
+  const plain=el.dataset.plain;const step=Math.max(1,Math.round(tg/55));
+  const tick=()=>{c+=step;if(c>=tg){el.textContent=plain?tg:tg+'+';}else{el.textContent=c;requestAnimationFrame(tick);}};tick();});}
+</script>
+</body>
+</html>
